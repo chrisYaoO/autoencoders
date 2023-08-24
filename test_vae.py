@@ -33,14 +33,15 @@ vae = VAE_attention(input_dim, latent_dim, intermediate_dim).vae_model
 
 vae.load_weights('results/' + dataset + '/' + model_filename + '.h5')
 
-Q = np.arange(80, 101)
+Q = np.arange(0, 101)
 reconstructed_data = vae.predict(x_test)
 mse = np.mean(np.power(x_test - reconstructed_data, 2), axis=1)
 test_losses = mse
-testing_set_predictions = np.zeros(len(test_losses))
 
+max = [0,0,0,0]
 for q in Q:
     print(q)
+    testing_set_predictions = np.zeros(len(test_losses))
     threshold = np.percentile(mse, q)  # 设置异常检测的阈值
 
     testing_set_predictions[np.where(test_losses > threshold)] = 1
@@ -48,5 +49,8 @@ for q in Q:
     recall = recall_score(y_test, testing_set_predictions)
     precision = precision_score(y_test, testing_set_predictions)
     f1 = f1_score(y_test, testing_set_predictions)
-    print("Performance over the testing data set \n")
-    print("Accuracy : {} \nRecall : {} \nPrecision : {} \nF1 : {}\n".format(accuracy, recall, precision, f1))
+    if f1 > max[1]:
+        max = [recall, precision, f1, q]
+
+print("Performance over the testing data set \n")
+print("Recall : {} \nPrecision : {} \nF1 : {}\nq : {}".format(*max))

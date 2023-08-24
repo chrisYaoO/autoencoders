@@ -131,10 +131,11 @@ class VAE_attention:
 
     def build_vae_model(self):
         encoder_inputs = Input(shape=(self.original_dim,))
-        #attention
+        # attention
         attention = SelfAttention()(encoder_inputs)
-
-        h = layers.Dense(self.intermediate_dim, activation='relu')(attention)
+        attention = attention[:, None]
+        lstm = layers.LSTM(64, activation='relu', input_shape=(100, self.original_dim))(attention)
+        h = layers.Dense(self.intermediate_dim, activation='relu')(lstm)
         h_1 = layers.Dense(self.intermediate_dim / 2, activation='relu')(h)
         # 计算p(Z|X)的均值和方差
         z_mean = layers.Dense(self.latent_dim)(h_1)
@@ -163,6 +164,6 @@ class VAE_attention:
         vae = Model(encoder_inputs, decoder_outputs)
         vae.add_loss(vae_loss)
         # 编译并训练VAE模型
-        vae.compile(optimizer='adam')
+        vae.compile(optimizer=adam.Adam())
 
         return vae

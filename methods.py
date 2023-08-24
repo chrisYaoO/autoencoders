@@ -10,6 +10,8 @@ from tensorflow.python.keras.models import load_model
 import json
 import tensorflow as tf
 from tensorflow.python.keras import layers,backend
+from tensorflow.python.keras.optimizer_v2 import adam
+
 
 # Helper function for scaling continous values
 def minmax_scale_values(training_df, testing_df, col_name):

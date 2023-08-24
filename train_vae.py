@@ -3,6 +3,7 @@ from model import *
 import tensorflow as tf
 from tensorflow.python.keras.metrics import accuracy
 from tensorflow.python.keras import layers, backend
+from tensorflow.python.keras.optimizer_v2 import adam
 
 # read config and dataset
 with open('config_vae.json') as config_file:
@@ -34,19 +35,20 @@ else:
 
 
 print('start training....')
-
 # 创建 TimeSeriesVAE 实例并使用
 input_dim = x_train.shape[1]
 # vae ae vae_attention
 vae = VAE_attention(input_dim, latent_dim, intermediate_dim).vae_model
 
 # 训练模型
-vae.fit(x_train,
-        shuffle=True,
-        epochs=num_epochs,
-        batch_size=batch_size,
-        validation_split=valid_rate)
+history = vae.fit(x_train, x_train,
+                  shuffle=True,
+                  epochs=num_epochs,
+                  batch_size=batch_size,
+                  validation_split=valid_rate)
 
 vae.save_weights('results/' + dataset + '/' + model_filename + '.h5')
 
+history_df = pd.DataFrame(history.history)
+history_df.to_csv('results/' + dataset + '/training_history_' + model_filename + '.csv', index=False)
 print('training completed')
